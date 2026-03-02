@@ -12,6 +12,9 @@ import {
   CreditCard,
   User,
   Lock,
+  Heart,
+  Wallet,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserPlan } from "@/hooks/use-user";
@@ -28,6 +31,8 @@ const NAV_SECTIONS = [
     items: [
       { label: "Dashboard", href: "/", icon: LayoutDashboard, minPlan: "free" as const },
       { label: "Markets", href: "/markets", icon: Store, minPlan: "free" as const },
+      { label: "Watchlist", href: "/watchlist", icon: Heart, minPlan: "free" as const },
+      { label: "Portfolio", href: "/portfolio", icon: Wallet, minPlan: "pro" as const },
     ],
   },
   {
@@ -36,6 +41,7 @@ const NAV_SECTIONS = [
       { label: "Whales", href: "/whales", icon: Waves, minPlan: "pro" as const },
       { label: "Leaderboard", href: "/leaderboard", icon: Trophy, minPlan: "free" as const },
       { label: "Arbitrage", href: "/arbitrage", icon: ArrowLeftRight, minPlan: "pro" as const },
+      { label: "Traders", href: "/leaderboard", icon: Users, minPlan: "free" as const },
     ],
   },
   {

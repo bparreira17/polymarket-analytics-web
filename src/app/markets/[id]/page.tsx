@@ -8,8 +8,11 @@ import Link from "next/link";
 import { PriceChart } from "@/components/charts/price-chart";
 import { OrderBookBar } from "@/components/markets/order-book-bar";
 import { TradesFeed } from "@/components/markets/trades-feed";
+import { WatchlistButton } from "@/components/markets/watchlist-button";
 import { useMarket, useMarketHistory, useOrderbook, useMarketTrades } from "@/hooks/use-markets";
 import { formatCurrency, formatPercent } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 const INTERVALS = [
   { label: "1H", value: "1h" },
@@ -29,6 +32,22 @@ export default function MarketDetailPage() {
   const { data: history, isLoading: historyLoading } = useMarketHistory(id, interval);
   const { data: orderbook } = useOrderbook(id);
   const { data: recentTrades } = useMarketTrades(id, 20);
+  const { data: relatedMarkets } = useQuery({
+    queryKey: ["related-markets", id],
+    queryFn: async () => {
+      const res = await api.correlations.related(id, 5);
+      return res.data;
+    },
+    enabled: !!id,
+  });
+  const { data: socialData } = useQuery({
+    queryKey: ["social", id],
+    queryFn: async () => {
+      const res = await api.social.marketMentions(id, 7);
+      return res.data;
+    },
+    enabled: !!id,
+  });
 
   if (marketLoading) {
     return (
@@ -77,9 +96,12 @@ export default function MarketDetailPage() {
             <p className="text-[11px] text-white/40 mt-1 line-clamp-1">{market.description}</p>
           )}
         </div>
-        <a href={market.url} target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60">
-          <ExternalLink className="w-3.5 h-3.5" />
-        </a>
+        <div className="flex items-center gap-2 shrink-0">
+          <WatchlistButton marketId={id} size="md" />
+          <a href={market.url} target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60">
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
       </div>
 
       {/* Main grid: Chart left, sidebar right */}
@@ -213,6 +235,64 @@ export default function MarketDetailPage() {
               ))}
             </div>
           </div>
+
+          {/* Social Buzz */}
+          {socialData && socialData.summary.totalMentions > 0 && (
+            <div className="panel p-4">
+              <h2 className="text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-3">Social Buzz</h2>
+              <div className="space-y-2">
+                <div className="flex justify-between text-[12px]">
+                  <span className="text-white/40">Mentions (7d)</span>
+                  <span className="font-mono tabnum">{socialData.summary.totalMentions}</span>
+                </div>
+                <div className="flex justify-between text-[12px]">
+                  <span className="text-white/40">Avg/day</span>
+                  <span className="font-mono tabnum">{socialData.summary.avgDailyMentions}</span>
+                </div>
+                <div className="flex gap-1 mt-2">
+                  {(["positive", "neutral", "negative"] as const).map((s) => {
+                    const count = socialData.summary.sentimentCounts[s];
+                    const total = socialData.summary.totalMentions || 1;
+                    const colors = { positive: "bg-emerald-500", neutral: "bg-white/20", negative: "bg-red-500" };
+                    return (
+                      <div
+                        key={s}
+                        className={`h-1.5 rounded-full ${colors[s]}`}
+                        style={{ width: `${(count / total) * 100}%` }}
+                        title={`${s}: ${count}`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Related Markets */}
+          {relatedMarkets && relatedMarkets.length > 0 && (
+            <div className="panel p-4">
+              <h2 className="text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-3">Related Markets</h2>
+              <div className="space-y-2">
+                {relatedMarkets.map((rm) =>
+                  rm.market ? (
+                    <Link
+                      key={rm.market.id}
+                      href={`/markets/${rm.market.id}`}
+                      className="block hover:bg-white/[0.02] -mx-2 px-2 py-1.5 rounded transition-colors"
+                    >
+                      <p className="text-[11px] font-medium line-clamp-1">{rm.market.title}</p>
+                      <div className="flex justify-between text-[10px] mt-0.5">
+                        <span className="text-white/30">{rm.market.category}</span>
+                        <span className="text-amber-400 font-mono tabnum">
+                          r={parseFloat(rm.correlation).toFixed(2)}
+                        </span>
+                      </div>
+                    </Link>
+                  ) : null,
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

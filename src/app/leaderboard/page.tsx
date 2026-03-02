@@ -6,6 +6,7 @@ import { Trophy, Medal } from "lucide-react";
 import { useLeaderboard } from "@/hooks/use-markets";
 import { formatCurrency, formatPercent, truncateAddress, parseNum, formatNumber } from "@/lib/utils";
 import type { Platform } from "@/types";
+import Link from "next/link";
 
 export default function LeaderboardPage() {
   const [page, setPage] = useState(1);
@@ -66,9 +67,9 @@ export default function LeaderboardPage() {
                       <span className="font-mono tabnum">#{entry.rank}</span>
                     )}
                   </span>
-                  <span className="font-medium truncate text-[12px]">
+                  <Link href={`/traders/${entry.traderAddress}`} className="font-medium truncate text-[12px] hover:text-amber-400 transition-colors">
                     {entry.displayName || truncateAddress(entry.traderAddress)}
-                  </span>
+                  </Link>
                   <span className={`text-[10px] font-semibold ${
                     entry.platform === "polymarket" ? "text-violet-400" : "text-blue-400"
                   }`}>

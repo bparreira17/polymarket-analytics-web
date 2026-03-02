@@ -4,6 +4,7 @@ import { Chip } from "@heroui/react";
 import Link from "next/link";
 import type { Market } from "@/types";
 import { formatCurrency, formatPercent } from "@/lib/utils";
+import { WatchlistButton } from "./watchlist-button";
 
 interface MarketCardProps {
   market: Market;
@@ -47,6 +48,7 @@ export function MarketCard({ market }: MarketCardProps) {
               {market.title}
             </p>
           </div>
+          <WatchlistButton marketId={market.id} size="sm" className="shrink-0 mt-1" />
         </div>
 
         <div className="space-y-2.5">

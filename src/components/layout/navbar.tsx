@@ -15,6 +15,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Activity, Sparkles, LogIn, User } from "lucide-react";
+import { NotificationPanel } from "./notification-panel";
 
 const navLinks = [
   { label: "Dashboard", href: "/" },
@@ -102,6 +103,9 @@ export function Navbar() {
           </NavbarItem>
         </SignedOut>
         <SignedIn>
+          <NavbarItem>
+            <NotificationPanel />
+          </NavbarItem>
           <NavbarItem>
             <Button
               as={Link}

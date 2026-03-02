@@ -8,6 +8,14 @@ import type {
   ApiPaginatedResponse,
   ApiDataResponse,
   Platform,
+  WatchlistEntry,
+  Notification,
+  PortfolioData,
+  TraderProfile,
+  FollowedTrader,
+  SocialData,
+  CustomDashboard,
+  MarketCorrelation,
 } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -135,6 +143,188 @@ export const api = {
     const params: Record<string, string> = {};
     if (limit) params.limit = String(limit);
     return fetchAPI<ApiDataResponse<Trade[]>>(`/api/markets/${marketId}/trades`, params);
+  },
+
+  // Watchlists
+  watchlists: {
+    list(token: string) {
+      return fetchAPI<{ data: WatchlistEntry[]; meta: { count: number; limit: number } }>(
+        "/api/watchlists",
+        undefined,
+        { token },
+      );
+    },
+    ids(token: string) {
+      return fetchAPI<{ data: string[] }>("/api/watchlists/ids", undefined, { token });
+    },
+    add(marketId: string, token: string) {
+      return fetchAPI<{ data: WatchlistEntry }>("/api/watchlists", undefined, {
+        token,
+        method: "POST",
+        body: { marketId },
+      });
+    },
+    remove(marketId: string, token: string) {
+      return fetchAPI<{ deleted: boolean }>(`/api/watchlists/${marketId}`, undefined, {
+        token,
+        method: "DELETE",
+      });
+    },
+  },
+
+  // Notifications
+  notifications: {
+    list(params?: { page?: number; limit?: number; token?: string }) {
+      const queryParams: Record<string, string> = {};
+      if (params?.page) queryParams.page = String(params.page);
+      if (params?.limit) queryParams.limit = String(params.limit);
+      return fetchAPI<ApiPaginatedResponse<Notification>>("/api/notifications", queryParams, {
+        token: params?.token,
+      });
+    },
+    unreadCount(token: string) {
+      return fetchAPI<{ data: { unread: number } }>("/api/notifications/unread-count", undefined, {
+        token,
+      });
+    },
+    markRead(id: number, token: string) {
+      return fetchAPI<{ data: { id: number } }>(`/api/notifications/${id}/read`, undefined, {
+        token,
+        method: "POST",
+      });
+    },
+    markAllRead(token: string) {
+      return fetchAPI<{ success: boolean }>("/api/notifications/read-all", undefined, {
+        token,
+        method: "POST",
+      });
+    },
+  },
+
+  // Portfolio
+  portfolio: {
+    connect(walletAddress: string, token: string, platform?: Platform) {
+      return fetchAPI<{ data: { id: string } }>("/api/portfolio/connect", undefined, {
+        token,
+        method: "POST",
+        body: { walletAddress, platform: platform ?? "polymarket" },
+      });
+    },
+    get(token: string) {
+      return fetchAPI<{ data: PortfolioData }>("/api/portfolio", undefined, { token });
+    },
+    history(params?: { page?: number; limit?: number; token?: string }) {
+      const queryParams: Record<string, string> = {};
+      if (params?.page) queryParams.page = String(params.page);
+      if (params?.limit) queryParams.limit = String(params.limit);
+      return fetchAPI<ApiPaginatedResponse<Trade & { marketTitle: string }>>(
+        "/api/portfolio/history",
+        queryParams,
+        { token: params?.token },
+      );
+    },
+    disconnect(id: string, token: string) {
+      return fetchAPI<{ deleted: boolean }>(`/api/portfolio/${id}`, undefined, {
+        token,
+        method: "DELETE",
+      });
+    },
+  },
+
+  // Traders
+  traders: {
+    profile(address: string, token?: string) {
+      return fetchAPI<{ data: TraderProfile }>(`/api/traders/${address}`, undefined, { token });
+    },
+    trades(address: string, params?: { page?: number; limit?: number }) {
+      const queryParams: Record<string, string> = {};
+      if (params?.page) queryParams.page = String(params.page);
+      if (params?.limit) queryParams.limit = String(params.limit);
+      return fetchAPI<{ data: (Trade & { marketTitle: string })[] }>(
+        `/api/traders/${address}/trades`,
+        queryParams,
+      );
+    },
+    follow(address: string, token: string) {
+      return fetchAPI<{ data: { id: number } }>(`/api/traders/${address}/follow`, undefined, {
+        token,
+        method: "POST",
+      });
+    },
+    unfollow(address: string, token: string) {
+      return fetchAPI<{ deleted: boolean }>(`/api/traders/${address}/unfollow`, undefined, {
+        token,
+        method: "DELETE",
+      });
+    },
+    following(token: string) {
+      return fetchAPI<{ data: FollowedTrader[] }>("/api/traders/following/list", undefined, {
+        token,
+      });
+    },
+  },
+
+  // Social
+  social: {
+    marketMentions(marketId: string, days?: number) {
+      const params: Record<string, string> = {};
+      if (days) params.days = String(days);
+      return fetchAPI<{ data: SocialData }>(`/api/markets/${marketId}/social`, params);
+    },
+    trending(limit?: number) {
+      const params: Record<string, string> = {};
+      if (limit) params.limit = String(limit);
+      return fetchAPI<{ data: Array<Record<string, unknown>> }>("/api/trending", params);
+    },
+  },
+
+  // Correlations
+  correlations: {
+    related(marketId: string, limit?: number) {
+      const params: Record<string, string> = {};
+      if (limit) params.limit = String(limit);
+      return fetchAPI<{ data: MarketCorrelation[] }>(`/api/markets/${marketId}/related`, params);
+    },
+  },
+
+  // Dashboards (Enterprise)
+  dashboards: {
+    list(token: string) {
+      return fetchAPI<{ data: CustomDashboard[] }>("/api/dashboards", undefined, { token });
+    },
+    get(id: string, token: string) {
+      return fetchAPI<{ data: CustomDashboard }>(`/api/dashboards/${id}`, undefined, { token });
+    },
+    create(name: string, token: string) {
+      return fetchAPI<{ data: CustomDashboard }>("/api/dashboards", undefined, {
+        token,
+        method: "POST",
+        body: { name, layout: [] },
+      });
+    },
+    update(id: string, data: { name?: string; layout?: CustomDashboard["layout"] }, token: string) {
+      return fetchAPI<{ data: CustomDashboard }>(`/api/dashboards/${id}`, undefined, {
+        token,
+        method: "PUT",
+        body: data,
+      });
+    },
+    delete(id: string, token: string) {
+      return fetchAPI<{ deleted: boolean }>(`/api/dashboards/${id}`, undefined, {
+        token,
+        method: "DELETE",
+      });
+    },
+  },
+
+  // Export
+  exportData: {
+    tradesUrl(token: string) {
+      return `${API_BASE}/api/export/trades?token=${token}`;
+    },
+    portfolioUrl(token: string) {
+      return `${API_BASE}/api/export/portfolio?token=${token}`;
+    },
   },
 
   // Billing
