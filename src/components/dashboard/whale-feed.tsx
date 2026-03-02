@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardBody, Chip, Spinner } from "@heroui/react";
+import { Spinner } from "@heroui/react";
 import { Waves } from "lucide-react";
 import type { Trade } from "@/types";
-import { formatCurrency, formatRelativeTime, truncateAddress } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 interface WhaleFeedProps {
   trades: Trade[];
@@ -14,61 +14,57 @@ export function WhaleFeed({ trades, isLoading }: WhaleFeedProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <Spinner size="lg" />
+        <Spinner size="sm" />
       </div>
     );
   }
 
-  if (!trades.length) {
+  if (!trades || trades.length === 0) {
     return (
-      <div className="text-center py-8 text-default-400">
-        <Waves className="w-8 h-8 mx-auto mb-2 opacity-50" />
-        <p className="text-sm">No whale trades detected yet</p>
+      <div className="text-center py-8 text-white/30">
+        <Waves className="w-5 h-5 mx-auto mb-2 opacity-30" />
+        <p className="text-[11px]">No whale trades yet</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      {trades.map((trade) => (
-        <Card key={trade.id} className="bg-default-50 border border-default-100">
-          <CardBody className="flex flex-row items-center gap-3 py-2 px-3">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                trade.side === "buy" ? "bg-success" : "bg-danger"
-              }`}
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm line-clamp-1">
-                <span className="font-medium">
-                  {trade.trader_address
-                    ? truncateAddress(trade.trader_address)
-                    : "Unknown"}
-                </span>{" "}
-                <span className={trade.side === "buy" ? "text-success" : "text-danger"}>
-                  {trade.side === "buy" ? "bought" : "sold"}
-                </span>{" "}
-                <span className="font-medium">{formatCurrency(trade.amount)}</span>
-              </p>
-              <p className="text-xs text-default-400 line-clamp-1">
-                {trade.market_title}
-              </p>
-            </div>
-            <div className="text-right shrink-0">
-              <Chip
-                size="sm"
-                variant="flat"
-                color={trade.platform === "polymarket" ? "secondary" : "primary"}
-              >
-                {trade.platform === "polymarket" ? "PM" : "Kalshi"}
-              </Chip>
-              <p className="text-xs text-default-400 mt-1">
-                {formatRelativeTime(trade.timestamp)}
-              </p>
-            </div>
-          </CardBody>
-        </Card>
-      ))}
+    <div className="overflow-hidden" style={{ maxHeight: "384px" }}>
+      {/* Header */}
+      <div className="grid grid-cols-[48px_32px_1fr_56px] gap-1.5 px-3 py-1.5 text-[9px] uppercase tracking-widest text-white/25 font-semibold border-b border-white/[0.04]">
+        <span>Time</span>
+        <span>Side</span>
+        <span>Market</span>
+        <span className="text-right">Amt</span>
+      </div>
+
+      {trades.slice(0, 12).map((trade) => {
+        const time = new Date(trade.timestamp);
+        const hms = time.toLocaleTimeString("en-US", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        const isBuy = trade.side === "buy";
+
+        return (
+          <div
+            key={trade.id}
+            className="grid grid-cols-[48px_32px_1fr_56px] gap-1.5 items-center px-3 border-b border-white/[0.02] last:border-0"
+            style={{ height: "30px" }}
+          >
+            <span className="text-[10px] text-white/30 font-mono tabnum">{hms}</span>
+            <span className={`text-[9px] font-bold ${isBuy ? "text-emerald-400" : "text-red-400"}`}>
+              {isBuy ? "BUY" : "SELL"}
+            </span>
+            <span className="text-[11px] text-white/60 truncate">{trade.marketTitle || "Unknown"}</span>
+            <span className="text-[11px] font-mono font-semibold text-white/70 tabnum text-right">
+              {formatCurrency(trade.amount)}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

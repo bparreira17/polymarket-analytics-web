@@ -1,3 +1,101 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --gradient-primary: linear-gradient(135deg, #0088ff 0%, #6c5ce7 100%);
+  }
+
+  body {
+    background: #09090b;
+    color: #e4e4e7;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-violet-500;
+  }
+
+  .glass {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.06];
+  }
+
+  .glow-sm {
+    box-shadow: 0 0 20px rgba(0, 136, 255, 0.08);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 30px rgba(0, 136, 255, 0.15);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  /* Terminal panel */
+  .panel {
+    @apply bg-[#111113] border border-white/[0.06] rounded-lg;
+  }
+
+  /* Tabular numbers for data tables */
+  .tabnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Accent color (Bloomberg amber) */
+  .accent {
+    @apply text-amber-400;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flash-green {
+  0% { background-color: rgba(16, 185, 129, 0.25); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flash-red {
+  0% { background-color: rgba(239, 68, 68, 0.25); }
+  100% { background-color: transparent; }
+}
+
+.flash-green {
+  animation: flash-green 300ms ease-out;
+}
+
+.flash-red {
+  animation: flash-red 300ms ease-out;
+}
+
+/* Marquee animation for ticker tape */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 60s linear infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardBody,
-  CardFooter,
-  Chip,
-  Progress,
-  Image,
-} from "@heroui/react";
+import { Chip } from "@heroui/react";
 import Link from "next/link";
 import type { Market } from "@/types";
 import { formatCurrency, formatPercent } from "@/lib/utils";
@@ -22,61 +15,65 @@ export function MarketCard({ market }: MarketCardProps) {
   const yesPrice = yesOutcome?.price ?? 0;
 
   return (
-    <Card
-      as={Link}
-      href={`/markets/${market.id}`}
-      isPressable
-      className="bg-default-50 border border-default-100 hover:border-primary/50 transition-colors"
-    >
-      <CardBody className="gap-3">
-        <div className="flex items-start gap-3">
-          {market.image_url && (
-            <Image
-              src={market.image_url}
-              alt={market.title}
-              className="w-10 h-10 rounded-lg object-cover shrink-0"
-              width={40}
-              height={40}
+    <Link href={`/markets/${market.id}`} className="group block">
+      <div className="glass rounded-2xl p-4 h-full transition-all duration-300 hover:border-primary/20 hover:glow-sm group-hover:translate-y-[-2px]">
+        <div className="flex items-start gap-3 mb-3">
+          {market.imageUrl ? (
+            <img
+              src={market.imageUrl}
+              alt=""
+              className="w-10 h-10 rounded-xl object-cover shrink-0 bg-white/5"
             />
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-violet-500/20 shrink-0" />
           )}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-1.5 mb-1.5">
               <Chip
                 size="sm"
                 variant="flat"
-                color={market.platform === "polymarket" ? "secondary" : "primary"}
+                classNames={{
+                  base: market.platform === "polymarket"
+                    ? "bg-violet-500/10 text-violet-400"
+                    : "bg-blue-500/10 text-blue-400",
+                  content: "text-[10px] font-semibold tracking-wide",
+                }}
               >
-                {market.platform === "polymarket" ? "PM" : "Kalshi"}
+                {market.platform === "polymarket" ? "PM" : "KAL"}
               </Chip>
-              <Chip size="sm" variant="flat" color="default">
-                {market.category}
-              </Chip>
+              <span className="text-[10px] text-default-500">{market.category}</span>
             </div>
-            <p className="text-sm font-medium line-clamp-2">{market.title}</p>
+            <p className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-foreground transition-colors">
+              {market.title}
+            </p>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-success">{yesOutcome?.name || "Yes"} {formatPercent(yesPrice)}</span>
-            <span className="text-danger">{noOutcome?.name || "No"} {formatPercent(noOutcome?.price ?? 1 - yesPrice)}</span>
+        <div className="space-y-2.5">
+          <div className="flex justify-between items-center text-xs font-medium">
+            <span className="text-emerald-400">
+              {yesOutcome?.name || "Yes"} {formatPercent(yesPrice)}
+            </span>
+            <span className="text-red-400">
+              {noOutcome?.name || "No"} {formatPercent(noOutcome?.price ?? 1 - yesPrice)}
+            </span>
           </div>
-          <Progress
-            value={yesPrice * 100}
-            color="success"
-            size="sm"
-            className="max-w-full"
-          />
+          <div className="relative h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all"
+              style={{ width: `${yesPrice * 100}%` }}
+            />
+          </div>
         </div>
-      </CardBody>
 
-      <CardFooter className="justify-between text-xs text-default-400 pt-0">
-        <span>Vol: {formatCurrency(market.volume)}</span>
-        {market.liquidity && <span>Liq: {formatCurrency(market.liquidity)}</span>}
-        {market.end_date && (
-          <span>Ends: {new Date(market.end_date).toLocaleDateString()}</span>
-        )}
-      </CardFooter>
-    </Card>
+        <div className="flex justify-between text-[10px] text-default-500 mt-3 pt-3 border-t border-white/[0.04]">
+          <span>Vol {formatCurrency(market.volume)}</span>
+          {market.liquidity && <span>Liq {formatCurrency(market.liquidity)}</span>}
+          {market.endDate && (
+            <span>{new Date(market.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+          )}
+        </div>
+      </div>
+    </Link>
   );
 }

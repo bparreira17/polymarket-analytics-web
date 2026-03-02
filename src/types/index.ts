@@ -11,21 +11,21 @@ export interface MarketOutcome {
 export interface Market {
   id: string;
   platform: Platform;
-  platform_id: string;
+  platformId: string;
   title: string;
   description: string | null;
   category: string;
   status: MarketStatus;
-  volume: number;
-  liquidity: number | null;
-  end_date: string | null;
-  image_url: string | null;
+  volume: string;
+  liquidity: string | null;
+  endDate: string | null;
+  imageUrl: string | null;
   url: string;
   outcomes: MarketOutcome[];
   metadata: Record<string, unknown> | null;
-  matched_market_id: string | null;
-  created_at: string;
-  updated_at: string;
+  matchedMarketId: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PricePoint {
@@ -36,39 +36,44 @@ export interface PricePoint {
 
 export interface Trade {
   id: number;
-  market_id: string;
-  market_title?: string;
+  marketId: string;
+  marketTitle?: string;
   platform: Platform;
-  trader_address: string | null;
+  traderAddress: string | null;
   side: TradeSide;
-  outcome_index: number;
-  amount: number;
-  price: number;
+  outcomeIndex: number;
+  amount: string;
+  price: string;
   timestamp: string;
-  is_whale: boolean;
+  isWhale: boolean;
 }
 
 export interface LeaderboardEntry {
   id: number;
   platform: Platform;
-  trader_address: string;
-  display_name: string | null;
-  profit_loss: number;
-  volume: number;
-  num_trades: number;
-  win_rate: number | null;
+  traderAddress: string;
+  displayName: string | null;
+  profitLoss: string;
+  volume: string;
+  numTrades: number;
+  winRate: string | null;
   rank: number;
 }
 
 export interface ArbitrageOpportunity {
   id: number;
-  market_a: { id: string; title: string; platform: Platform };
-  market_b: { id: string; title: string; platform: Platform };
+  marketAId: string;
+  marketBId: string;
+  marketATitle?: string;
+  marketBTitle?: string;
+  marketAPlatform?: Platform;
+  marketBPlatform?: Platform;
   outcome: string;
-  price_a: number;
-  price_b: number;
-  spread: number;
-  detected_at: string;
+  priceA: string;
+  priceB: string;
+  spread: string;
+  detectedAt: string;
+  isActive: boolean;
 }
 
 export interface TopMover {
@@ -76,18 +81,25 @@ export interface TopMover {
   title: string;
   platform: Platform;
   category: string;
-  volume: number;
+  volume: string;
   outcomes: MarketOutcome[];
-  current_price: number;
-  previous_price: number;
-  change: number;
+  latest_price: string;
+  old_price: string;
+  price_change: string;
+  abs_change: string;
   image_url: string | null;
 }
 
-export interface PaginatedResponse<T> {
+export interface ApiPaginatedResponse<T> {
   data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  total_pages: number;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface ApiDataResponse<T> {
+  data: T;
 }

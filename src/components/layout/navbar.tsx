@@ -10,17 +10,17 @@ import {
   NavbarMenuItem,
   Link,
   Button,
-  Chip,
 } from "@heroui/react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Activity } from "lucide-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Activity, Sparkles, LogIn, User } from "lucide-react";
 
 const navLinks = [
   { label: "Dashboard", href: "/" },
   { label: "Markets", href: "/markets" },
   { label: "Leaderboard", href: "/leaderboard" },
-  { label: "Whale Tracker", href: "/whales" },
+  { label: "Whales", href: "/whales" },
   { label: "Arbitrage", href: "/arbitrage" },
 ];
 
@@ -33,57 +33,115 @@ export function Navbar() {
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
       maxWidth="2xl"
+      height="3.5rem"
       classNames={{
-        base: "bg-background/80 backdrop-blur-lg border-b border-default-100",
-        item: "data-[active=true]:text-primary",
+        base: "bg-background/70 backdrop-blur-2xl border-b border-white/[0.06] fixed z-50",
+        wrapper: "px-6 gap-6",
       }}
     >
       <NavbarContent>
         <NavbarMenuToggle className="sm:hidden" />
         <NavbarBrand>
           <Link href="/" className="flex items-center gap-2 text-foreground">
-            <Activity className="w-6 h-6 text-primary" />
-            <span className="font-bold text-lg">PolyAnalytics</span>
-            <Chip size="sm" variant="flat" color="primary" className="ml-1">
-              Beta
-            </Chip>
+            <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 shadow-md shadow-blue-500/25">
+              <Activity className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="font-extrabold text-[15px] tracking-tight leading-none">
+              Poly<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-500">Analytics</span>
+            </span>
           </Link>
         </NavbarBrand>
       </NavbarContent>
 
-      <NavbarContent className="hidden sm:flex gap-6" justify="center">
-        {navLinks.map((link) => (
-          <NavbarItem key={link.href} isActive={pathname === link.href}>
-            <Link
-              href={link.href}
-              color={pathname === link.href ? "primary" : "foreground"}
+      <NavbarContent className="hidden sm:flex gap-0.5" justify="center">
+        {navLinks.map((link) => {
+          const isActive = pathname === link.href;
+          return (
+            <NavbarItem key={link.href}>
+              <Link
+                href={link.href}
+                className={`px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
+                  isActive
+                    ? "bg-white/[0.08] text-foreground"
+                    : "text-default-500 hover:text-foreground hover:bg-white/[0.04]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            </NavbarItem>
+          );
+        })}
+      </NavbarContent>
+
+      <NavbarContent justify="end" className="gap-2">
+        <SignedOut>
+          <NavbarItem>
+            <Button
+              as={Link}
+              href="/sign-in"
               size="sm"
+              radius="lg"
+              variant="flat"
+              className="text-white/70 text-xs font-medium h-8 px-3"
+              startContent={<LogIn className="w-3 h-3" />}
             >
-              {link.label}
-            </Link>
+              Sign In
+            </Button>
           </NavbarItem>
-        ))}
+          <NavbarItem>
+            <Button
+              as={Link}
+              href="/pricing"
+              size="sm"
+              radius="lg"
+              className="bg-gradient-to-r from-blue-500 to-violet-600 text-white text-xs font-semibold h-8 px-4 shadow-lg shadow-blue-500/20"
+              startContent={<Sparkles className="w-3 h-3" />}
+            >
+              Upgrade
+            </Button>
+          </NavbarItem>
+        </SignedOut>
+        <SignedIn>
+          <NavbarItem>
+            <Button
+              as={Link}
+              href="/pricing"
+              size="sm"
+              radius="lg"
+              className="bg-gradient-to-r from-blue-500 to-violet-600 text-white text-xs font-semibold h-8 px-4 shadow-lg shadow-blue-500/20"
+              startContent={<Sparkles className="w-3 h-3" />}
+            >
+              Upgrade
+            </Button>
+          </NavbarItem>
+          <NavbarItem>
+            <Button
+              as={Link}
+              href="/account"
+              size="sm"
+              radius="lg"
+              variant="flat"
+              className="text-white/70 text-xs font-medium h-8 px-3"
+              startContent={<User className="w-3 h-3" />}
+            >
+              Account
+            </Button>
+          </NavbarItem>
+          <NavbarItem>
+            <UserButton
+              appearance={{
+                elements: { avatarBox: "w-7 h-7" },
+              }}
+            />
+          </NavbarItem>
+        </SignedIn>
       </NavbarContent>
 
-      <NavbarContent justify="end">
-        <NavbarItem>
-          <Button
-            as={Link}
-            color="primary"
-            href="/pricing"
-            variant="flat"
-            size="sm"
-          >
-            Upgrade to Pro
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
-
-      <NavbarMenu>
+      <NavbarMenu className="bg-background/95 backdrop-blur-2xl pt-4">
         {navLinks.map((link) => (
           <NavbarMenuItem key={link.href}>
             <Link
-              className="w-full"
+              className="w-full py-2"
               color={pathname === link.href ? "primary" : "foreground"}
               href={link.href}
               size="lg"

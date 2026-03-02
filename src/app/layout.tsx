@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import "./globals.css";
 import { Providers } from "./providers";
+import { TerminalShell } from "@/components/layout/terminal-shell";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -15,7 +18,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Polymarket Analytics — The Bloomberg Terminal for Prediction Markets",
+  title: "PolyAnalytics — Bloomberg Terminal for Prediction Markets",
   description:
     "Real-time analytics, whale tracking, and cross-platform arbitrage for Polymarket and Kalshi prediction markets.",
   keywords: [
@@ -38,7 +41,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <ClerkProvider appearance={{ baseTheme: dark }}>
+          <Providers>
+            <TerminalShell>{children}</TerminalShell>
+          </Providers>
+        </ClerkProvider>
       </body>
     </html>
   );

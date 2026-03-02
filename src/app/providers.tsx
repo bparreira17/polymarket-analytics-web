@@ -12,7 +12,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 30 * 1000,
-            refetchOnWindowFocus: false,
+            refetchInterval: 30_000,
+            refetchOnWindowFocus: true,
           },
         },
       })

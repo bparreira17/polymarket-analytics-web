@@ -1,19 +1,17 @@
 "use client";
 
-import { Input, Select, SelectItem, Button, ButtonGroup } from "@heroui/react";
+import { Input } from "@heroui/react";
 import { Search, X } from "lucide-react";
 import type { Platform } from "@/types";
 
 const CATEGORIES = [
-  "All",
-  "Politics",
-  "Crypto",
-  "Sports",
-  "Science",
-  "Entertainment",
-  "Economics",
-  "Technology",
-  "World",
+  { label: "All", value: "" },
+  { label: "Politics", value: "politics" },
+  { label: "Crypto", value: "crypto" },
+  { label: "Sports", value: "sports" },
+  { label: "Science", value: "science" },
+  { label: "Tech", value: "technology" },
+  { label: "Economics", value: "economics" },
 ];
 
 interface MarketFiltersProps {
@@ -34,7 +32,7 @@ export function MarketFilters({
   onCategoryChange,
 }: MarketFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-3 w-full">
+    <div className="flex flex-col gap-4">
       <Input
         placeholder="Search markets..."
         value={search}
@@ -42,49 +40,51 @@ export function MarketFilters({
         startContent={<Search className="w-4 h-4 text-default-400" />}
         endContent={
           search ? (
-            <button onClick={() => onSearchChange("")}>
-              <X className="w-4 h-4 text-default-400" />
+            <button onClick={() => onSearchChange("")} className="hover:text-foreground">
+              <X className="w-3.5 h-3.5 text-default-400" />
             </button>
           ) : null
         }
         size="sm"
-        className="flex-1 min-w-[200px]"
+        classNames={{
+          inputWrapper: "glass !bg-white/[0.03] border-white/[0.06] h-10",
+          input: "text-sm",
+        }}
       />
 
-      <ButtonGroup size="sm" variant="flat">
-        <Button
-          color={platform === "all" ? "primary" : "default"}
-          onPress={() => onPlatformChange("all")}
-        >
-          All
-        </Button>
-        <Button
-          color={platform === "polymarket" ? "primary" : "default"}
-          onPress={() => onPlatformChange("polymarket")}
-        >
-          Polymarket
-        </Button>
-        <Button
-          color={platform === "kalshi" ? "primary" : "default"}
-          onPress={() => onPlatformChange("kalshi")}
-        >
-          Kalshi
-        </Button>
-      </ButtonGroup>
-
-      <Select
-        size="sm"
-        selectedKeys={[category]}
-        onChange={(e) => onCategoryChange(e.target.value)}
-        className="w-full sm:w-[180px]"
-        aria-label="Category filter"
-      >
-        {CATEGORIES.map((cat) => (
-          <SelectItem key={cat === "All" ? "" : cat.toLowerCase()}>
-            {cat}
-          </SelectItem>
+      <div className="flex flex-wrap gap-2">
+        {/* Platform filters */}
+        {(["all", "polymarket", "kalshi"] as const).map((p) => (
+          <button
+            key={p}
+            onClick={() => onPlatformChange(p)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              platform === p
+                ? "bg-primary/15 text-primary border border-primary/20"
+                : "bg-white/[0.03] text-default-500 border border-white/[0.06] hover:text-foreground hover:border-white/[0.1]"
+            }`}
+          >
+            {p === "all" ? "All Platforms" : p === "polymarket" ? "Polymarket" : "Kalshi"}
+          </button>
         ))}
-      </Select>
+
+        <div className="w-px bg-white/[0.06] mx-1" />
+
+        {/* Category filters */}
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.value}
+            onClick={() => onCategoryChange(cat.value)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              category === cat.value
+                ? "bg-primary/15 text-primary border border-primary/20"
+                : "bg-white/[0.03] text-default-500 border border-white/[0.06] hover:text-foreground hover:border-white/[0.1]"
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

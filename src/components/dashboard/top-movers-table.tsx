@@ -1,19 +1,11 @@
 "use client";
 
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Chip,
-  Spinner,
-} from "@heroui/react";
 import Link from "next/link";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { Spinner } from "@heroui/react";
+import { Minus } from "lucide-react";
+import { parseNum, formatCurrency } from "@/lib/utils";
+import { PriceFlash } from "./price-flash";
 import type { TopMover } from "@/types";
-import { formatCurrency, formatPercent, formatPercentChange } from "@/lib/utils";
 
 interface TopMoversTableProps {
   movers: TopMover[];
@@ -23,77 +15,69 @@ interface TopMoversTableProps {
 export function TopMoversTable({ movers, isLoading }: TopMoversTableProps) {
   if (isLoading) {
     return (
-      <div className="flex justify-center py-8">
-        <Spinner size="lg" />
+      <div className="flex justify-center py-12">
+        <Spinner size="sm" />
+      </div>
+    );
+  }
+
+  if (!movers || movers.length === 0) {
+    return (
+      <div className="text-center py-12 text-white/30">
+        <Minus className="w-5 h-5 mx-auto mb-2 opacity-30" />
+        <p className="text-[11px]">No movers yet</p>
       </div>
     );
   }
 
   return (
-    <Table
-      aria-label="Top movers"
-      removeWrapper
-      classNames={{
-        th: "bg-default-100 text-default-500 text-xs uppercase",
-        td: "py-3",
-      }}
-    >
-      <TableHeader>
-        <TableColumn>Market</TableColumn>
-        <TableColumn>Platform</TableColumn>
-        <TableColumn align="end">Price</TableColumn>
-        <TableColumn align="end">24h Change</TableColumn>
-        <TableColumn align="end">Volume</TableColumn>
-      </TableHeader>
-      <TableBody emptyContent="No movers found">
-        {movers.map((mover) => (
-          <TableRow
+    <div className="overflow-x-auto">
+      {/* Header */}
+      <div className="grid grid-cols-[24px_1fr_48px_64px_56px_72px] gap-2 px-3 py-1.5 text-[9px] uppercase tracking-widest text-white/25 font-semibold border-b border-white/[0.04]">
+        <span>#</span>
+        <span>Market</span>
+        <span>Plat</span>
+        <span className="text-right">Price</span>
+        <span className="text-right">Chg</span>
+        <span className="text-right">Vol</span>
+      </div>
+
+      {/* Rows */}
+      {movers.map((mover, i) => {
+        const price = parseNum(mover.latest_price) * 100;
+        const change = parseNum(mover.price_change) * 100;
+        const isUp = change >= 0;
+
+        return (
+          <Link
             key={mover.id}
-            as={Link}
             href={`/markets/${mover.id}`}
-            className="cursor-pointer hover:bg-default-50"
+            className="grid grid-cols-[24px_1fr_48px_64px_56px_72px] gap-2 items-center px-3 hover:bg-white/[0.02] transition-colors border-b border-white/[0.02] last:border-0"
+            style={{ height: "32px" }}
           >
-            <TableCell>
-              <span className="text-sm font-medium line-clamp-1">
-                {mover.title}
+            <span className="text-[10px] text-white/25 font-mono tabnum">{i + 1}</span>
+            <span className="text-[12px] text-white/70 truncate">{mover.title}</span>
+            <span className={`text-[10px] font-bold ${
+              mover.platform === "polymarket" ? "text-violet-400" : "text-blue-400"
+            }`}>
+              {mover.platform === "polymarket" ? "PM" : "KAL"}
+            </span>
+            <PriceFlash value={price}>
+              <span className="text-[12px] font-mono font-bold text-white/80 tabnum text-right block">
+                {price.toFixed(1)}%
               </span>
-            </TableCell>
-            <TableCell>
-              <Chip
-                size="sm"
-                variant="flat"
-                color={mover.platform === "polymarket" ? "secondary" : "primary"}
-              >
-                {mover.platform === "polymarket" ? "PM" : "Kalshi"}
-              </Chip>
-            </TableCell>
-            <TableCell>
-              <span className="text-sm">{formatPercent(mover.current_price)}</span>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center justify-end gap-1">
-                {mover.change >= 0 ? (
-                  <TrendingUp className="w-3 h-3 text-success" />
-                ) : (
-                  <TrendingDown className="w-3 h-3 text-danger" />
-                )}
-                <span
-                  className={`text-sm font-medium ${
-                    mover.change >= 0 ? "text-success" : "text-danger"
-                  }`}
-                >
-                  {formatPercentChange(mover.change)}
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>
-              <span className="text-sm text-default-400">
-                {formatCurrency(mover.volume)}
-              </span>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+            </PriceFlash>
+            <span className={`text-[11px] font-mono font-bold tabnum text-right ${
+              isUp ? "text-emerald-400" : "text-red-400"
+            }`}>
+              {isUp ? "+" : ""}{change.toFixed(1)}
+            </span>
+            <span className="text-[10px] font-mono text-white/30 tabnum text-right">
+              {formatCurrency(mover.volume)}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
   );
 }
