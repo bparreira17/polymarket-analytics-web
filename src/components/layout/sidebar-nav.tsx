@@ -15,6 +15,7 @@ import {
   Heart,
   Wallet,
   Users,
+  Keyboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserPlan } from "@/hooks/use-user";
@@ -59,7 +60,11 @@ const PLAN_BADGE: Record<string, { label: string; color: string }> = {
   enterprise: { label: "ENT", color: "text-violet-400" },
 };
 
-export function SidebarNav() {
+interface SidebarNavProps {
+  onShortcutsOpen?: () => void;
+}
+
+export function SidebarNav({ onShortcutsOpen }: SidebarNavProps) {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
   const { data } = useUserPlan();
@@ -115,11 +120,20 @@ export function SidebarNav() {
 
       {/* Footer */}
       <div className="border-t border-white/[0.04] px-4 py-3">
-        {isSignedIn && (
-          <p className={cn("text-[9px] font-bold font-mono tracking-wider mb-1", badge.color)}>
-            {badge.label}
-          </p>
-        )}
+        <div className="flex items-center justify-between mb-1">
+          {isSignedIn && (
+            <p className={cn("text-[9px] font-bold font-mono tracking-wider", badge.color)}>
+              {badge.label}
+            </p>
+          )}
+          <button
+            onClick={onShortcutsOpen}
+            className="p-1 rounded hover:bg-white/[0.06] text-white/20 hover:text-white/40 transition-colors"
+            title="Keyboard shortcuts (?)"
+          >
+            <Keyboard className="w-3.5 h-3.5" />
+          </button>
+        </div>
         <p className="text-[9px] text-white/20 font-mono">v0.1.0</p>
         <p className="text-[9px] text-white/20 font-mono mt-0.5">Data: 30s refresh</p>
       </div>

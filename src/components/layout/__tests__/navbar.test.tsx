@@ -16,6 +16,7 @@ vi.mock("@clerk/nextjs", () => ({
   SignedOut: ({ children }: { children: React.ReactNode }) =>
     mockSignedOut() ? <>{children}</> : null,
   UserButton: () => <div data-testid="user-button" />,
+  useAuth: () => ({ isSignedIn: mockSignedIn(), getToken: vi.fn() }),
 }));
 
 // Mock HeroUI - simplified component stubs
@@ -36,11 +37,22 @@ vi.mock("@heroui/react", () => ({
   },
 }));
 
+// Mock notification hooks
+vi.mock("@/hooks/use-notifications", () => ({
+  useNotifications: () => ({ data: { data: [] } }),
+  useUnreadCount: () => ({ data: 0 }),
+  useMarkNotificationRead: () => ({ mutate: vi.fn() }),
+  useMarkAllRead: () => ({ mutate: vi.fn() }),
+}));
+
 // Mock lucide-react
 vi.mock("lucide-react", () => ({
   Activity: () => <span />,
   Sparkles: () => <span />,
   LogIn: () => <span />,
+  User: () => <span />,
+  Bell: () => <span />,
+  CheckCheck: () => <span />,
 }));
 
 import { Navbar } from "@/components/layout/navbar";

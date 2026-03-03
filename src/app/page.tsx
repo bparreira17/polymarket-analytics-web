@@ -2,17 +2,30 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 import { StatStrip } from "@/components/dashboard/stat-strip";
 import { TopMoversTable } from "@/components/dashboard/top-movers-table";
 import { WhaleFeed } from "@/components/dashboard/whale-feed";
 import { ArbitrageScanner } from "@/components/dashboard/arbitrage-scanner";
 import { MiniLeaderboard } from "@/components/dashboard/mini-leaderboard";
 import { CategoryHeatMap } from "@/components/dashboard/category-heat-map";
+import { PremiumPreview } from "@/components/dashboard/premium-preview";
 import { useTopMovers, useWhaleTrades } from "@/hooks/use-markets";
+import { useUserPlan } from "@/hooks/use-user";
+
+const PLAN_LEVELS: Record<string, number> = {
+  free: 0,
+  pro: 1,
+  enterprise: 2,
+};
 
 export default function DashboardPage() {
   const { data: moversData, isLoading: moversLoading } = useTopMovers(10);
   const { data: whalesData, isLoading: whalesLoading } = useWhaleTrades({ limit: 12 });
+  const { isSignedIn } = useAuth();
+  const { data: planData } = useUserPlan();
+
+  const hasPro = isSignedIn && (PLAN_LEVELS[planData?.plan ?? "free"] ?? 0) >= 1;
 
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
@@ -40,7 +53,9 @@ export default function DashboardPage() {
               All <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <WhaleFeed trades={whalesData?.data ?? []} isLoading={whalesLoading} />
+          <PremiumPreview requiredPlan="pro" featureName="Whale Tracker">
+            <WhaleFeed trades={whalesData?.data ?? []} isLoading={whalesLoading} previewMode={!hasPro} />
+          </PremiumPreview>
         </div>
       </div>
 
@@ -60,7 +75,9 @@ export default function DashboardPage() {
               All <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <ArbitrageScanner />
+          <PremiumPreview requiredPlan="pro" featureName="Arbitrage Scanner">
+            <ArbitrageScanner previewMode={!hasPro} />
+          </PremiumPreview>
         </div>
 
         <div className="lg:col-span-3 panel overflow-hidden">
