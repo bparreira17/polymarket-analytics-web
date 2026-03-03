@@ -36,7 +36,7 @@ const nextConfig = {
               "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com",
               "font-src 'self' data:",
               "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com wss://*.onrender.com " +
-                (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"),
+                (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").trim(),
               "frame-src 'self' https://*.clerk.accounts.dev",
               "worker-src 'self' blob:",
             ].join("; "),
