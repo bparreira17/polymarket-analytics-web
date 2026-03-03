@@ -317,13 +317,33 @@ export const api = {
     },
   },
 
-  // Export
+  // Export (blob download — keeps JWT out of URL/logs/referrer)
   exportData: {
-    tradesUrl(token: string) {
-      return `${API_BASE}/api/export/trades?token=${token}`;
+    async downloadTrades(token: string) {
+      const res = await fetch(`${API_BASE}/api/export/trades`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `trades_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
     },
-    portfolioUrl(token: string) {
-      return `${API_BASE}/api/export/portfolio?token=${token}`;
+    async downloadPortfolio(token: string) {
+      const res = await fetch(`${API_BASE}/api/export/portfolio`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `portfolio_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
     },
   },
 

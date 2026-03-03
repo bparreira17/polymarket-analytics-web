@@ -2,20 +2,26 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/nextjs";
 
-const WS_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001")
+const WS_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001")
   .replace(/^http/, "ws") + "/ws";
 
 export function useWebSocket() {
   const queryClient = useQueryClient();
+  const { getToken, isSignedIn } = useAuth();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
+    if (!isSignedIn) return; // Skip WS if user is not signed in
 
     try {
-      const ws = new WebSocket(WS_URL);
+      const token = await getToken();
+      if (!token) return;
+
+      const ws = new WebSocket(`${WS_BASE}?token=${token}`);
       wsRef.current = ws;
 
       ws.onmessage = (event) => {
@@ -45,7 +51,7 @@ export function useWebSocket() {
       // WebSocket connection failed, retry
       reconnectTimeoutRef.current = setTimeout(connect, 10_000);
     }
-  }, [queryClient]);
+  }, [queryClient, getToken, isSignedIn]);
 
   useEffect(() => {
     connect();
