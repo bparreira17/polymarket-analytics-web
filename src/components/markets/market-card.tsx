@@ -24,6 +24,13 @@ export function MarketCard({ market }: MarketCardProps) {
               src={market.imageUrl}
               alt=""
               className="w-10 h-10 rounded-xl object-cover shrink-0 bg-white/5"
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.style.display = "none";
+                const fallback = document.createElement("div");
+                fallback.className = "w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-violet-500/20 shrink-0";
+                target.parentNode?.insertBefore(fallback, target);
+              }}
             />
           ) : (
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-violet-500/20 shrink-0" />

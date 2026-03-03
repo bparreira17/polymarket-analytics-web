@@ -33,7 +33,7 @@ const nextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com",
+              "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://polymarket-upload.s3.us-east-2.amazonaws.com https://*.polymarket.com https://kalshi.com https://*.kalshi.com",
               "font-src 'self' data:",
               "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com wss://*.onrender.com " +
                 (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").trim(),
